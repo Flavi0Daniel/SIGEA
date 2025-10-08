@@ -25,13 +25,57 @@ class UserRepository {
     // Buscar usuário por ID
     async findById(id) {
         const [rows] = await db.execute(
-            'SELECT * FROM users WHERE id = ? AND is_active = TRUE',
-            [id]
+          'SELECT * FROM users WHERE id = ?',
+          [id]
         );
-        return rows.length > 0 ? new User(rows[0]) : null;
+        return rows[0] ? new User(rows[0]) : null;
     }
+      
 
     // Outros métodos: update, delete, findAll, etc.
+
+    // Buscar todos os usuários ativos
+    async findAll() {
+        const [rows] = await db.execute(
+            'SELECT * FROM users WHERE is_active = TRUE'
+        );
+        return rows.map(row => new User(row));
+    }
+
+
+    async update(id, { name, phone, avatar }) {
+        await db.execute(
+          'UPDATE users SET name = ?, phone = ?, avatar = ? WHERE id = ? AND is_active = TRUE',
+          [name, phone, avatar, id]
+        );
+      
+        return this.findById(id);
+    }
+
+    async updatePassword(id, hashedPassword) {
+        await db.execute(
+          'UPDATE users SET password = ? WHERE id = ? AND is_active = TRUE',
+          [hashedPassword, id]
+        );
+    }
+
+    async deactivate(id) {
+        await db.execute(
+          'UPDATE users SET is_active = FALSE WHERE id = ?',
+          [id]
+        );
+    }
+
+    async reactivate(id) {
+        await db.execute(
+          'UPDATE users SET is_active = TRUE WHERE id = ?',
+          [id]
+        );
+    }
+      
+      
+      
+      
 }
 
 module.exports = new UserRepository();
