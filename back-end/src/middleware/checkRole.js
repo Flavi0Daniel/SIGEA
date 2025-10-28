@@ -1,5 +1,8 @@
 function checkRole(...allowedRoles) {
     return (req, res, next) => {
+      console.log('Usuário autenticado:', req.user);
+
+
       const userRole = req.user?.role;
       if (!userRole || !allowedRoles.includes(userRole)) {
         return res.status(403).json({
@@ -10,6 +13,7 @@ function checkRole(...allowedRoles) {
       next();
     };
   }
-  
+ 
+
   module.exports = checkRole;
   

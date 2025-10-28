@@ -17,10 +17,16 @@ app.use(express.urlencoded({ extended: true }));
 // Rotas
 const authRoutes = require('../routes/auth');
 const userRoutes = require('../routes/users');
+const courseRoutes = require('../routes/courses');
+const classRoutes = require('../routes/classes');
+
 // ... outras rotas
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/courses', courseRoutes);
+app.use('/api/classes', classRoutes);
+
 // ... outras rotas
 
 // Middleware de erro

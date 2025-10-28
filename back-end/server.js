@@ -7,6 +7,9 @@ const morgan = require('morgan');
 // Importar rotas
 const authRoutes = require('./src/routes/auth');
 const userRoutes = require('./src/routes/users');
+const courseRoutes = require('./src/routes/courses');
+const classRoutes = require('./src/routes/classes');
+
 // ... outras rotas
 
 const app = express();
@@ -21,6 +24,9 @@ app.use(express.urlencoded({ extended: true }));
 // Rotas da API
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/courses', courseRoutes);
+app.use('/api/classes', classRoutes);
+
 // ... outras rotas
 
 // Middleware de tratamento de erros
