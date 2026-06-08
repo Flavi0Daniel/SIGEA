@@ -1,0 +1,1007 @@
+//asta config:
+
+// Este ficheiro estabelece a ligação com a base de dados MySQL
+const mysql = require('mysql2/promise');
+
+const dbConfig = {
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+};
+
+// Criar pool de conexões para melhor performance
+const pool = mysql.createPool(dbConfig);
+
+module.exports = pool;
+
+//////
+
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+
+// Inicializa o Express
+const app = express();
+
+// Middlewares
+app.use(helmet());
+app.use(cors());
+app.use(morgan('combined'));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Rotas
+const authRoutes = require('../routes/auth');
+const userRoutes = require('../routes/users');
+const courseRoutes = require('../routes/courses');
+const classRoutes = require('../routes/classes');
+
+// ... outras rotas
+
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/courses', courseRoutes);
+app.use('/api/classes', classRoutes);
+
+// ... outras rotas
+
+// Middleware de erro
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ success: false, message: 'Erro interno do servidor' });
+});
+
+// Inicia o servidor
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
+
+/////
+
+// pasta controllers
+// Este controlador gere as rotas de autenticação
+const AuthService = require('../services/AuthService');
+
+class AuthController {
+    // POST /api/auth/register
+    async register(req, res) {
+        try {
+            const result = await AuthService.register(req.body);
+            
+            res.status(201).json({
+                success: true,
+                message: 'Usuário registado com sucesso',
+                data: result
+            });
+        } catch (error) {
+            res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
+    }
+
+    // POST /api/auth/login
+    async login(req, res) {
+        try {
+            const { email, password } = req.body;
+            const result = await AuthService.login(email, password);
+            
+            res.json({
+                success: true,
+                message: 'Login realizado com sucesso',
+                data: result
+            });
+        } catch (error) {
+            res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
+    }
+}
+
+module.exports = new AuthController();
+
+//////
+
+const ClassRepository = require('../repositories/ClassRepository');
+
+class ClassController {
+  async create(req, res) {
+    const { course_id, instructor_id, name, start_date, end_date, max_students, schedule } = req.body;
+
+    try {
+      const turma = await ClassRepository.create({
+        course_id,
+        instructor_id,
+        name,
+        start_date,
+        end_date,
+        max_students,
+        schedule
+      });
+
+      res.status(201).json({ success: true, data: turma.toJSON() });
+    } catch (err) {
+      console.error('Erro ao criar turma:', err);
+      res.status(500).json({ success: false, message: 'Erro ao criar turma' });
+    }
+  }
+
+  //async list(req, res) {
+    //try {
+      //const turmas = await ClassRepository.findAllActive();
+     // res.json({ success: true, data: turmas.map(t => t.toJSON()) });
+    //} catch (err) {
+     // res.status(500).json({ success: false, message: 'Erro ao listar turmas' });
+   // }
+  //}
+
+  async list(req, res) {
+    try {
+      let turmas;
+  
+      if (req.user.role === 'admin') {
+        turmas = await ClassRepository.findAllActive();
+      } else if (req.user.role === 'instructor') {
+        turmas = await ClassRepository.findByInstructorId(req.user.id);
+      } else {
+        return res.status(403).json({ success: false, message: 'Acesso negado' });
+      }
+  
+      res.json({ success: true, data: turmas.map(t => t.toJSON()) });
+    } catch (err) {
+      console.error('Erro ao listar turmas:', err);
+      res.status(500).json({ success: false, message: 'Erro ao listar turmas' });
+    }
+  }
+  
+
+  async update(req, res) {
+    const id = parseInt(req.params.id);
+    const { course_id, instructor_id, name, start_date, end_date, max_students, schedule } = req.body;
+
+    try {
+      const updated = await ClassRepository.update(id, {
+        course_id,
+        instructor_id,
+        name,
+        start_date,
+        end_date,
+        max_students,
+        schedule
+      });
+
+      res.json({ success: true, data: updated.toJSON() });
+    } catch (err) {
+      res.status(500).json({ success: false, message: 'Erro ao atualizar turma' });
+    }
+  }
+
+  async deactivate(req, res) {
+    const id = parseInt(req.params.id);
+
+    try {
+      await ClassRepository.deactivate(id);
+      res.json({ success: true, message: 'Turma desativada com sucesso' });
+    } catch (err) {
+      res.status(500).json({ success: false, message: 'Erro ao desativar turma' });
+    }
+  }
+
+  async reactivate(req, res) {
+    const id = parseInt(req.params.id);
+
+    try {
+      await ClassRepository.reactivate(id);
+      res.json({ success: true, message: 'Turma reativada com sucesso' });
+    } catch (err) {
+      res.status(500).json({ success: false, message: 'Erro ao reativar turma' });
+    }
+  }
+}
+
+module.exports = new ClassController();
+
+
+///////
+
+const CourseRepository = require('../repositories/CourseRepository');
+
+class CourseController {
+  async create(req, res) {
+    const { name, description, duration_hours, price, image } = req.body;
+    const created_by = req.user.id;
+
+    try {
+      const course = await CourseRepository.create({ name, description, duration_hours, price, image, created_by });
+      res.status(201).json({ success: true, data: course.toJSON() });
+    } catch (err) {
+      console.error('Erro ao criar curso:', err);
+      res.status(500).json({ success: false, message: 'Erro ao criar curso' });
+    }
+  }
+
+  async list(req, res) {
+    try {
+      const courses = await CourseRepository.findAllActive();
+      res.json({ success: true, data: courses.map(c => c.toJSON()) });
+    } catch (err) {
+      res.status(500).json({ success: false, message: 'Erro ao listar cursos' });
+    }
+  }
+
+  async update(req, res) {
+    const id = parseInt(req.params.id);
+    const { name, description, duration_hours, price, image } = req.body;
+
+    try {
+      const updated = await CourseRepository.update(id, { name, description, duration_hours, price, image });
+      res.json({ success: true, data: updated.toJSON() });
+    } catch (err) {
+      res.status(500).json({ success: false, message: 'Erro ao atualizar curso' });
+    }
+  }
+
+  async deactivate(req, res) {
+    const id = parseInt(req.params.id);
+
+    try {
+      await CourseRepository.deactivate(id);
+      res.json({ success: true, message: 'Curso desativado com sucesso' });
+    } catch (err) {
+      res.status(500).json({ success: false, message: 'Erro ao desativar curso' });
+    }
+  }
+
+  async reactivate(req, res) {
+    const id = parseInt(req.params.id);
+  
+    try {
+      await CourseRepository.reactivate(id);
+      res.json({ success: true, message: 'Curso reativado com sucesso' });
+    } catch (err) {
+      console.error('Erro ao reativar curso:', err);
+      res.status(500).json({ success: false, message: 'Erro ao reativar curso' });
+    }
+  }
+  
+
+
+}
+
+module.exports = new CourseController();
+
+
+/////
+
+const UserRepository = require('../repositories/UserRepository');
+const bcrypt = require('bcrypt');
+
+class UserController {
+  async getProfile(req, res) {
+    const user = await UserRepository.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
+    }
+
+    res.json({ success: true, data: user.toJSON() });
+  }
+
+  async listAllUsers(req, res) {
+    try {
+      const users = await UserRepository.findAll();
+      const formatted = users.map(user => {
+        return typeof user.toJSON === 'function' ? user.toJSON() : user;
+      });
+  
+      res.json({ success: true, data: formatted });
+    } catch (err) {
+      console.error('Erro ao listar usuários:', err);
+      res.status(500).json({ success: false, message: 'Erro interno ao listar usuários' });
+    }
+  }
+  
+  async updateProfile(req, res) {
+    const { name, phone, avatar } = req.body;
+
+    try {
+      const updatedUser = await UserRepository.update(req.user.id, { name, phone, avatar });
+      res.json({ success: true, data: updatedUser.toJSON() });
+    } catch (err) {
+      console.error('Erro ao atualizar perfil:', err);
+      res.status(500).json({ success: false, message: 'Erro ao atualizar perfil' });
+    }
+  }
+
+  async changePassword(req, res) {
+    const { currentPassword, newPassword } = req.body;
+
+    try {
+      const user = await UserRepository.findById(req.user.id);
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
+      }
+
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ success: false, message: 'Senha atual incorreta' });
+      }
+
+      const hashed = await bcrypt.hash(newPassword, 10);
+      await UserRepository.updatePassword(req.user.id, hashed);
+
+      res.json({ success: true, message: 'Senha alterada com sucesso' });
+    } catch (err) {
+      console.error('Erro ao alterar senha:', err);
+      res.status(500).json({ success: false, message: 'Erro ao alterar senha' });
+    }
+  }
+
+  async deactivateUser(req, res) {
+    const userId = parseInt(req.params.id);
+
+    try {
+      const user = await UserRepository.findById(userId);
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
+      }
+
+      await UserRepository.deactivate(userId);
+      res.json({ success: true, message: 'Usuário desativado com sucesso' });
+    } catch (err) {
+      console.error('Erro ao desativar usuário:', err);
+      res.status(500).json({ success: false, message: 'Erro ao desativar usuário' });
+    }
+  }
+
+  async createUser(req, res) {
+    const { name, email, password, phone, role, avatar } = req.body;
+
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = await UserRepository.create({
+        name,
+        email,
+        password: hashedPassword,
+        phone,
+        role,
+        avatar: avatar || 'default.png'
+      });
+
+      res.status(201).json({ success: true, data: newUser.toJSON() });
+    } catch (err) {
+      console.error('Erro ao criar usuário:', err); // <-- isso já está certo
+      res.status(500).json({ success: false, message: err.message || 'Erro ao criar usuário' });
+    }    
+  }
+
+  async reactivateUser(req, res) {
+    const userId = parseInt(req.params.id);
+
+    try {
+      const user = await UserRepository.findById(userId);
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
+      }
+
+      await UserRepository.reactivate(userId);
+      res.json({ success: true, message: 'Usuário reativado com sucesso' });
+    } catch (err) {
+      console.error('Erro ao reativar usuário:', err);
+      res.status(500).json({ success: false, message: 'Erro ao reativar usuário' });
+    }
+  }
+
+}
+
+module.exports = new UserController();
+
+
+
+//////
+
+// pasta middleware
+
+const jwt = require('jsonwebtoken');
+const UserRepository = require('../repositories/UserRepository');
+
+async function verifyToken(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({ success: false, message: 'Token não fornecido' });
+  }
+
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await UserRepository.findById(decoded.userId);
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Usuário não encontrado' });
+    }
+
+    req.user = user; // Agora o req.user tem o role, email, etc.
+    next();
+  } catch (err) {
+    return res.status(401).json({ success: false, message: 'Token inválido ou expirado' });
+  }
+}
+
+module.exports = verifyToken;
+
+
+/////////////
+
+function checkRole(...allowedRoles) {
+    return (req, res, next) => {
+      console.log('Usuário autenticado:', req.user);
+
+
+      const userRole = req.user?.role;
+      if (!userRole || !allowedRoles.includes(userRole)) {
+        return res.status(403).json({
+          success: false,
+          message: 'Acesso negado: permissão insuficiente'
+        });
+      }
+      next();
+    };
+  }
+ 
+
+  module.exports = checkRole;
+  
+
+  //////////////////////
+
+
+
+  function validateRegister(req, res, next) {
+  // Validação simples
+  next();
+}
+
+function validateLogin(req, res, next) {
+  // Validação simples
+  next();
+}
+
+module.exports = {
+  validateRegister,
+  validateLogin
+};
+
+//////////////////////////
+
+
+// pasta models
+
+class Class {
+    constructor({
+      id,
+      course_id,
+      instructor_id,
+      name,
+      start_date,
+      end_date,
+      max_students,
+      schedule,
+      is_active,
+      created_at
+    }) {
+      this.id = id;
+      this.course_id = course_id;
+      this.instructor_id = instructor_id;
+      this.name = name;
+      this.start_date = start_date;
+      this.end_date = end_date;
+      this.max_students = max_students;
+      this.schedule = schedule;
+      this.is_active = is_active;
+      this.created_at = created_at;
+    }
+  
+    toJSON() {
+      return { ...this };
+    }
+  }
+  
+  module.exports = Class;
+  
+
+  ////////////
+
+  class Course {
+    constructor(data) {
+      this.id = data.id;
+      this.name = data.name;
+      this.description = data.description;
+      this.duration_hours = data.duration_hours;
+      this.price = data.price;
+      this.image = data.image;
+      this.is_active = data.is_active;
+      this.created_by = data.created_by;
+      this.created_at = data.created_at;
+      this.updated_at = data.updated_at;
+    }
+  
+    toJSON() {
+      return {
+        id: this.id,
+        name: this.name,
+        description: this.description,
+        duration_hours: this.duration_hours,
+        price: this.price,
+        image: this.image,
+        is_active: this.is_active,
+        created_by: this.created_by,
+        created_at: this.created_at,
+        updated_at: this.updated_at
+      };
+    }
+  }
+  
+  module.exports = Course;
+  
+
+  ////////////////
+
+  // Este modelo define como um usuário é estruturado no sistema
+class User {
+    constructor(data) {
+        this.id = data.id;
+        this.name = data.name;
+        this.email = data.email;
+        this.password = data.password;
+        this.phone = data.phone;
+        this.role = data.role || 'student';
+        this.avatar = data.avatar;
+        this.is_active = data.is_active !== undefined ? data.is_active : true;
+        this.created_at = data.created_at;
+        this.updated_at = data.updated_at;
+    }
+
+    // Método para retornar dados sem a senha (para segurança)
+    toJSON() {
+        const { password, ...userWithoutPassword } = this;
+        return userWithoutPassword;
+    }
+}
+
+module.exports = User;
+
+
+
+///////////////////////
+
+
+// pasta repositories
+
+const db = require('../config/database');
+const Class = require('../models/Class');
+
+class ClassRepository {
+  async create(data) {
+    const [result] = await db.execute(`
+      INSERT INTO tbl_turma (course_id, instructor_id, name, start_date, end_date, max_students, schedule)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `, [
+      data.course_id,
+      data.instructor_id,
+      data.name,
+      data.start_date,
+      data.end_date,
+      data.max_students ?? 30,
+      data.schedule ?? null
+    ]);
+
+    return this.findById(result.insertId);
+  }
+
+  async findById(id) {
+    const [rows] = await db.execute('SELECT * FROM tbl_turma WHERE id = ?', [id]);
+    return rows[0] ? new Class(rows[0]) : null;
+  }
+
+  async findAllActive() {
+    const [rows] = await db.execute('SELECT * FROM tbl_turma WHERE is_active = 1');
+    return rows.map(row => new Class(row));
+  }
+
+  async update(id, data) {
+    await db.execute(`
+      UPDATE tbl_turma
+      SET course_id = ?, instructor_id = ?, name = ?, start_date = ?, end_date = ?, max_students = ?, schedule = ?
+      WHERE id = ?
+    `, [
+      data.course_id,
+      data.instructor_id,
+      data.name,
+      data.start_date,
+      data.end_date,
+      data.max_students,
+      data.schedule,
+      id
+    ]);
+
+    return this.findById(id);
+  }
+
+  async deactivate(id) {
+    await db.execute('UPDATE tbl_turma SET is_active = 0 WHERE id = ?', [id]);
+  }
+
+  async reactivate(id) {
+    await db.execute('UPDATE tbl_turma SET is_active = 1 WHERE id = ?', [id]);
+  }
+
+  async findByInstructorId(instructorId) {
+    const [rows] = await db.execute(`
+      SELECT * FROM tbl_turma
+      WHERE instructor_id = ? AND is_active = 1
+    `, [instructorId]);
+  
+    return rows.map(row => new Class(row));
+  }
+  
+
+}
+
+module.exports = new ClassRepository();
+
+
+//////////////////////
+
+const db = require('../config/database');
+const Course = require('../models/Course');
+
+class CourseRepository {
+  async create(data) {
+    const [result] = await db.execute(`
+      INSERT INTO tbl_cursos (name, description, duration_hours, price, image, is_active, created_by)
+      VALUES (?, ?, ?, ?, ?, TRUE, ?)
+    `, [data.name, data.description, data.duration_hours, data.price, data.image, data.created_by]);
+
+    return this.findById(result.insertId);
+  }
+
+  async findById(id) {
+    const [rows] = await db.execute('SELECT * FROM tbl_cursos WHERE id = ?', [id]);
+    return rows[0] ? new Course(rows[0]) : null;
+  }
+
+  async findAllActive() {
+    const [rows] = await db.execute('SELECT * FROM tbl_cursos WHERE is_active = TRUE');
+    return rows.map(row => new Course(row));
+  }
+
+  async deactivate(id) {
+    await db.execute('UPDATE tbl_cursos SET is_active = FALSE WHERE id = ?', [id]);
+  }
+
+  async update(id, data) {
+    await db.execute(`
+      UPDATE tbl_cursos SET name = ?, description = ?, duration_hours = ?, price = ?, image = ?
+      WHERE id = ?
+    `, [data.name, data.description, data.duration_hours, data.price, data.image, id]);
+
+    return this.findById(id);
+  }
+
+  async reactivate(id) {
+    await db.execute('UPDATE tbl_cursos SET is_active = TRUE WHERE id = ?', [id]);
+  }
+  
+
+
+}
+
+module.exports = new CourseRepository();
+
+
+///////////////////////////
+
+
+// Este repositório é responsável por todas as operações com usuários na BD
+const db = require('../config/database');
+const User = require('../models/User');
+
+class UserRepository {
+    // Buscar usuário por email (para login)
+    async findByEmail(email) {
+        const [rows] = await db.execute(
+            'SELECT * FROM tbl_user WHERE email = ? AND is_active = TRUE',
+            [email]
+        );
+        return rows.length > 0 ? new User(rows[0]) : null;
+    }
+
+    // Criar novo usuário
+    async create(userData) {
+        const [result] = await db.execute(`
+            INSERT INTO tbl_user (name, email, password, phone, role, avatar) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        `, [userData.name, userData.email, userData.password, userData.phone, userData.role, userData.avatar]);
+        
+        return this.findById(result.insertId);
+    }
+
+    // Buscar usuário por ID
+    async findById(id) {
+        const [rows] = await db.execute(
+          'SELECT * FROM tbl_user WHERE id = ?',
+          [id]
+        );
+        return rows[0] ? new User(rows[0]) : null;
+    }
+      
+
+    // Outros métodos: update, delete, findAll, etc.
+
+    // Buscar todos os usuários ativos
+    async findAll() {
+        const [rows] = await db.execute(
+            'SELECT * FROM tbl_user WHERE is_active = TRUE'
+        );
+        return rows.map(row => new User(row));
+    }
+
+
+    async update(id, { name, phone, avatar }) {
+        await db.execute(
+          'UPDATE tbl_user SET name = ?, phone = ?, avatar = ? WHERE id = ? AND is_active = TRUE',
+          [name, phone, avatar, id]
+        );
+      
+        return this.findById(id);
+    }
+
+    async updatePassword(id, hashedPassword) {
+        await db.execute(
+          'UPDATE tbl_user SET password = ? WHERE id = ? AND is_active = TRUE',
+          [hashedPassword, id]
+        );
+    }
+
+    async deactivate(id) {
+        await db.execute(
+          'UPDATE tbl_user SET is_active = FALSE WHERE id = ?',
+          [id]
+        );
+    }
+
+    async reactivate(id) {
+        await db.execute(
+          'UPDATE tbl_user SET is_active = TRUE WHERE id = ?',
+          [id]
+        );
+    }
+      
+      
+      
+      
+}
+
+module.exports = new UserRepository();
+
+
+
+
+//////////////////////
+
+// pasta rotas
+
+// Define as rotas de autenticação
+const express = require('express');
+const AuthController = require('../controllers/AuthController');
+const { validateRegister, validateLogin } = require('../middleware/validation');
+
+
+const router = express.Router();
+
+// POST /api/auth/register
+router.post('/register', validateRegister, AuthController.register);
+
+// POST /api/auth/login
+router.post('/login', validateLogin, AuthController.login);
+
+// GET /api/auth/ping
+router.get('/ping', (req, res) => {
+    res.json({ success: true, message: 'API de autenticação está viva!' });
+  });
+
+module.exports = router;
+
+/////////
+
+const express = require('express');
+const router = express.Router();
+const ClassController = require('../controllers/ClassController');
+const authMiddleware = require('../middleware/auth');
+const roleMiddleware = require('../middleware/checkRole');
+
+// 🔍 Listar turmas ativas
+router.get('/', authMiddleware, ClassController.list);
+
+// ➕ Criar turma admin 
+router.post('/', authMiddleware, roleMiddleware('admin'), ClassController.create);
+
+// ✏️ Editar turma
+router.put('/:id', authMiddleware, roleMiddleware('admin'), ClassController.update);
+
+// 🛑 Desativar turma
+router.put('/:id/deactivate', authMiddleware, roleMiddleware('admin'), ClassController.deactivate);
+
+// ✅ Reativar turma
+router.put('/:id/reactivate', authMiddleware, roleMiddleware('admin'), ClassController.reactivate);
+
+module.exports = router;
+
+//////////////////
+
+const express = require('express');
+const router = express.Router();
+const verifyToken = require('../middleware/auth');
+const checkRole = require('../middleware/checkRole');
+const CourseController = require('../controllers/CourseController');
+
+router.get('/', verifyToken, CourseController.list);
+router.post('/', verifyToken, checkRole('admin'), CourseController.create);
+router.put('/:id', verifyToken, checkRole('admin'), CourseController.update);
+router.put('/:id/deactivate', verifyToken, checkRole('admin'), CourseController.deactivate);
+router.put('/:id/reactivate', verifyToken, checkRole('admin'), CourseController.reactivate);
+
+
+module.exports = router;
+
+
+///////////////////
+
+const express = require('express');
+const verifyToken = require('../middleware/auth');
+const checkRole = require('../middleware/checkRole');
+const UserController = require('../controllers/UserController');
+
+const router = express.Router();
+
+// Rota protegida para perfil do usuário
+router.get('/me', verifyToken, UserController.getProfile);
+
+// Rota protegida por token e role
+router.get('/all', verifyToken, checkRole('admin'), UserController.listAllUsers);
+
+
+router.put('/me', verifyToken, UserController.updateProfile);
+
+
+router.put('/me/password', verifyToken, UserController.changePassword);
+
+
+router.put('/:id/deactivate', verifyToken, checkRole('admin'), UserController.deactivateUser);
+
+
+router.post('/create', verifyToken, checkRole('admin'), UserController.createUser);
+
+
+router.put('/:id/reactivate', verifyToken, checkRole('admin'), UserController.reactivateUser);
+
+
+module.exports = router;
+
+
+////////////////////////
+
+// pasta services
+
+// Este serviço cuida de toda a lógica de autenticação
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const UserRepository = require('../repositories/UserRepository');
+
+class AuthService {
+    // Registar novo usuário
+    async register(userData) {
+        // Verificar se o email já existe
+        const existingUser = await UserRepository.findByEmail(userData.email);
+        if (existingUser) {
+            throw new Error('Email já está em uso');
+        }
+
+        // Encriptar a senha
+        const hashedPassword = await bcrypt.hash(userData.password, 12);
+        
+        // Criar usuário
+        const newUser = await UserRepository.create({
+            ...userData,
+            password: hashedPassword
+        });
+
+        // Gerar token JWT
+        const token = this.generateToken(newUser.id);
+
+        return {
+            user: newUser.toJSON(), // Remove a senha do retorno
+            token
+        };
+    }
+
+    // Fazer login
+    async login(email, password) {
+        // Buscar usuário
+        const user = await UserRepository.findByEmail(email);
+        if (!user) {
+            throw new Error('Credenciais inválidas');
+        }
+
+        // Verificar senha
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            throw new Error('Credenciais inválidas');
+        }
+
+        // Gerar token
+        const token = this.generateToken(user.id);
+
+        return {
+            user: user.toJSON(),
+            token
+        };
+    }
+
+    // Gerar token JWT
+    generateToken(userId) {
+        return jwt.sign(
+            { userId },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+    }
+}
+
+module.exports = new AuthService();
+
+////////////////////
+
+class CertificateService {
+    async generateCertificate(enrollmentId) {
+        // Gerar PDF do certificado
+        // Guardar na base de dados
+        // Enviar via WhatsApp
+    }
+}
+
+////////////////
+
+class ProxyPayService {
+    async createPayment(enrollmentId, amount) {
+        // Lógica para criar pagamento no ProxyPay Sandbox
+        // Retornar URL de pagamento para o frontend
+    }
+
+    async verifyPayment(transactionId) {
+        // Verificar status do pagamento
+        // Actualizar na base de dados se pago
+    }
+}
+
+//////////////////
+
+class WhatsAppService {
+    async sendCertificate(phoneNumber, certificatePath) {
+        // Enviar certificado via WhatsApp
+    }
+}
+
+////////////////
+
+// pasta utils
+
+// não criei nada ainda
