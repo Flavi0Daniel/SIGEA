@@ -1,0 +1,58 @@
+<!-- register-modal.component.html -->
+<div class="modal-backdrop" (click)="onBackdropClick($event)">
+  <div class="modal-box" #modalBox>
+    <h2>Criar conta</h2>
+
+    <div class="alert-error" *ngIf="errorMsg">
+      <i class="bi bi-exclamation-circle"></i> {{ errorMsg }}
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #regForm="ngForm">
+      <div class="field">
+        <label>Nome</label>
+        <div class="input-wrap">
+          <i class="bi bi-person"></i>
+          <input type="text" [(ngModel)]="form.name" name="name"
+                 placeholder="Digite o seu nome" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Email</label>
+        <div class="input-wrap">
+          <i class="bi bi-envelope"></i>
+          <input type="email" [(ngModel)]="form.email" name="email"
+                 placeholder="Digite o seu email" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Senha</label>
+        <div class="input-wrap">
+          <i class="bi bi-lock"></i>
+          <input [type]="showPassword ? 'text' : 'password'"
+                 [(ngModel)]="form.password" name="password"
+                 placeholder="Digite a sua senha" required minlength="6">
+          <i class="bi toggle-pw"
+             [class.bi-eye]="!showPassword"
+             [class.bi-eye-slash]="showPassword"
+             (click)="showPassword = !showPassword"></i>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" [disabled]="loading">
+        <span *ngIf="!loading">Criar conta</span>
+        <span *ngIf="loading"><i class="bi bi-arrow-repeat spin"></i> A criar...</span>
+      </button>
+    </form>
+
+    <div class="modal-footer-links">
+      <span>Já tem conta?</span>
+      <a (click)="switchToLogin.emit()">Entrar</a>
+    </div>
+
+    <button class="modal-close" (click)="close.emit()">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+</div>

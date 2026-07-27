@@ -1,0 +1,173 @@
+<!-- src/app/features/student/my-enrollments/my-enrollments.component.html -->
+<app-navbar></app-navbar>
+
+<div class="student-page">
+
+  <!-- Cabeçalho -->
+  <div class="page-header" #pageHeader>
+    <div class="header-inner">
+      <div>
+        <h1><i class="bi bi-list-check"></i> As Minhas Inscrições</h1>
+        <p>Consulte e gira as suas inscrições nos cursos.</p>
+      </div>
+      <button class="btn-white" (click)="openCourseSelector()">
+        <i class="bi bi-plus-circle"></i> Nova Inscrição
+      </button>
+    </div>
+  </div>
+
+  <div class="page-body" #pageBody>
+
+    <!-- Filtros -->
+    <div class="filter-row">
+      <div class="filter-tabs">
+        <button *ngFor="let tab of tabs"
+                [class.active]="activeTab === tab.value"
+                (click)="setTab(tab.value)">
+          {{ tab.label }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-row" *ngIf="loading">
+      <i class="bi bi-arrow-repeat spin"></i> A carregar...
+    </div>
+
+    <!-- Lista de inscrições -->
+    <div class="enrollments-grid" *ngIf="!loading">
+
+      <div class="enrollment-card" *ngFor="let e of filtered" #enrollCard>
+        <div class="enroll-top">
+          <div class="course-icon">
+            <i class="bi bi-book-half"></i>
+          </div>
+          <div class="enroll-meta">
+            <h3>{{ e.course_name }}</h3>
+            <span class="class-name">{{ e.class_name }}</span>
+          </div>
+          <span class="badge" [ngClass]="'badge-' + e.status">
+            {{ statusLabel(e.status) }}
+          </span>
+        </div>
+
+        <div class="enroll-info">
+          <div class="info-row">
+            <i class="bi bi-calendar3"></i>
+            <span>Inscrito em: {{ e.enrollment_date | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="info-row">
+            <i class="bi bi-credit-card"></i>
+            <span>Pagamento:
+              <strong [class.text-green]="e.payment_status === 'paid'"
+                      [class.text-orange]="e.payment_status === 'pending'"
+                      [class.text-red]="e.payment_status === 'overdue'">
+                {{ paymentLabel(e.payment_status) }}
+              </strong>
+            </span>
+          </div>
+        </div>
+
+        <div class="enroll-actions">
+          <button class="btn-sm-outline"
+                  *ngIf="e.status === 'pending' && e.payment_status === 'pending'"
+                  (click)="viewPayment(e)">
+            <i class="bi bi-qr-code"></i> Ver Referência
+          </button>
+          <button class="btn-sm-outline"
+                  *ngIf="e.status === 'active' || e.status === 'completed'"
+                  (click)="viewGrades(e)">
+            <i class="bi bi-journal-text"></i> Boletim
+          </button>
+          <button class="btn-sm-danger"
+                  *ngIf="e.status === 'pending'"
+                  (click)="cancel(e.id)">
+            <i class="bi bi-x-circle"></i> Cancelar
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state" *ngIf="filtered.length === 0">
+        <i class="bi bi-inbox"></i>
+        <p *ngIf="activeTab === 'all'">Ainda não tem inscrições.</p>
+        <p *ngIf="activeTab !== 'all'">Sem inscrições com este estado.</p>
+        <button class="btn-red" (click)="openCourseSelector()">
+          <i class="bi bi-plus-circle"></i> Inscrever-me num curso
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: escolher curso para inscrição -->
+<div class="modal-backdrop" *ngIf="showCourseSelector" (click)="closeCourseSelector()">
+  <div class="modal-box" (click)="$event.stopPropagation()" #selectorModal>
+    <h3>Escolher Curso</h3>
+    <p class="modal-sub">Seleccione um curso activo para se inscrever.</p>
+
+    <div class="loading-row" *ngIf="loadingCourses">
+      <i class="bi bi-arrow-repeat spin"></i>
+    </div>
+
+    <div class="course-list" *ngIf="!loadingCourses">
+      <div class="course-item" *ngFor="let c of availableCourses"
+           (click)="selectCourse(c)">
+        <div class="course-item-info">
+          <strong>{{ c.name }}</strong>
+          <span>{{ c.duration_hours }}h &nbsp;|&nbsp; {{ c.price | number:'1.0-0' }} kz</span>
+        </div>
+        <i class="bi bi-chevron-right"></i>
+      </div>
+      <div class="empty-state small" *ngIf="availableCourses.length === 0">
+        <p>Sem cursos disponíveis.</p>
+      </div>
+    </div>
+
+    <button class="modal-close-btn" (click)="closeCourseSelector()">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+</div>
+
+<!-- Modal: referência de pagamento -->
+<div class="modal-backdrop" *ngIf="paymentModal" (click)="paymentModal = null">
+  <div class="modal-box payment-modal-box" (click)="$event.stopPropagation()">
+    <h3><i class="bi bi-credit-card"></i> Referência de Pagamento</h3>
+
+    <div class="payment-detail">
+      <div class="pay-row">
+        <span>Curso</span>
+        <strong>{{ paymentModal.course_name }}</strong>
+      </div>
+      <div class="pay-row">
+        <span>Entidade</span>
+        <strong>{{ paymentModal.entity || '99999' }}</strong>
+      </div>
+      <div class="pay-row highlight">
+        <span>Referência</span>
+        <strong class="ref-number">{{ paymentModal.reference || '—' }}</strong>
+      </div>
+      <div class="pay-row">
+        <span>Valor</span>
+        <strong>{{ paymentModal.amount | number:'1.2-2' }} kz</strong>
+      </div>
+      <div class="pay-row">
+        <span>Estado</span>
+        <span class="badge" [ngClass]="paymentModal.status === 'COMPLETED' ? 'badge-active' : 'badge-pending'">
+          {{ paymentModal.status === 'COMPLETED' ? 'Pago' : 'Pendente' }}
+        </span>
+      </div>
+    </div>
+
+    <p class="pay-instructions">
+      <i class="bi bi-info-circle"></i>
+      Dirija-se a um Caixa Electrónico ou utilize o Multicaixa Express para efectuar o pagamento.
+    </p>
+
+    <button class="btn-red full" (click)="paymentModal = null">Fechar</button>
+    <button class="modal-close-btn" (click)="paymentModal = null">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+</div>

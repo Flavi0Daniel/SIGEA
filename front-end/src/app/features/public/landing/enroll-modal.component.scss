@@ -1,0 +1,236 @@
+// enroll-modal.component.scss
+$red:     #D32F2F;
+$red-dark:#B71C1C;
+$white:   #FFFFFF;
+$text:    #1A1A1A;
+$muted:   #6B6B6B;
+$border:  #E0E0E0;
+$radius:  8px;
+
+.enroll-box {
+  max-width: 760px !important;
+  padding: 0 !important;
+}
+
+.enroll-header {
+  background: $red;
+  color: $white;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 12px 12px 0 0;
+
+  i { font-size: 1.2rem; }
+
+  h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: $white;
+    margin: 0;
+  }
+}
+
+.enroll-body {
+  padding: 24px;
+
+  &.two-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  &.single-col {
+    max-width: 460px;
+    margin: 0 auto;
+  }
+}
+
+.col-header {
+  background: $red;
+  color: $white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatar-placeholder {
+  width: 70px;
+  height: 70px;
+  background: #f5f5f5;
+  border: 1.5px dashed $border;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  i { font-size: 2.2rem; color: #BDBDBD; }
+}
+
+.field {
+  margin-bottom: 14px;
+
+  label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: $text;
+    margin-bottom: 5px;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid $border;
+    border-radius: $radius;
+    font-size: 0.88rem;
+    color: $text;
+    background: #FFF5F5;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+    font-family: inherit;
+
+    &:focus { border-color: $red; background: $white; }
+    &.readonly { background: #f5f5f5; color: $muted; cursor: default; }
+    &::placeholder { color: #BDBDBD; }
+  }
+}
+
+.row-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+// Informações de pagamento gerado
+.payment-info {
+  background: #FFF5F5;
+  border: 1px solid #FFCDD2;
+  border-radius: $radius;
+  padding: 16px;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+
+  .info-label { color: $muted; font-weight: 500; }
+  .info-value { font-weight: 700; color: $text; }
+
+  &.highlight {
+    background: $white;
+    border: 1.5px dashed $red;
+    border-radius: 6px;
+    padding: 10px 14px;
+  }
+
+  .ref {
+    color: $red;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+  }
+
+  .success {
+    color: #2E7D32;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+// Rodapé dos botões
+.enroll-footer {
+  border-top: 1px solid $border;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-submit {
+  background: $red;
+  color: $white;
+  border: none;
+  padding: 11px 28px;
+  border-radius: $radius;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: inherit;
+
+  &:hover:not(:disabled) { background: $red-dark; }
+  &:disabled { opacity: 0.65; cursor: not-allowed; }
+}
+
+.btn-outline-red {
+  background: transparent;
+  color: $red;
+  border: 1.5px solid $red;
+  padding: 10px 24px;
+  border-radius: $radius;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+
+  &:hover:not(:disabled) { background: $red; color: $white; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// Ecrã de sucesso
+.success-box {
+  padding: 48px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+
+  .success-icon i {
+    font-size: 4rem;
+    color: #2E7D32;
+  }
+
+  h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: $text;
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: $muted;
+    max-width: 340px;
+    line-height: 1.6;
+  }
+
+  .btn-submit {
+    margin-top: 8px;
+    padding: 12px 48px;
+    background: #2E7D32;
+    &:hover { background: #1B5E20; }
+  }
+}
+
+.spin {
+  display: inline-block;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

@@ -1,0 +1,122 @@
+<!-- src/app/features/admin/users/users.component.html -->
+<div class="admin-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Lista de Formadores</h1>
+      <p>Listagem dos formadores</p>
+    </div>
+    <button class="btn-primary" (click)="openAdd()">
+      <i class="bi bi-person-plus"></i> Adicionar Formador
+    </button>
+  </div>
+
+  <div class="search-bar">
+    <i class="bi bi-search"></i>
+    <input type="text" [(ngModel)]="search" placeholder="Pesquisar formador..." (input)="applyFilter()">
+  </div>
+
+  <div class="table-card">
+    <div class="loading-row" *ngIf="loading">
+      <i class="bi bi-arrow-repeat spin"></i> A carregar...
+    </div>
+
+    <table class="data-table" *ngIf="!loading">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome do Formador</th>
+          <th>E-mail</th>
+          <th>Telefone</th>
+          <th>Estado</th>
+          <th>Data</th>
+          <th>Operações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of filtered">
+          <td>{{ u.id }}</td>
+          <td><strong>{{ u.name }}</strong></td>
+          <td>{{ u.email }}</td>
+          <td>{{ u.phone || '—' }}</td>
+          <td>
+            <span class="badge" [ngClass]="u.is_active ? 'badge-active' : 'badge-inactive'">
+              {{ u.is_active ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          <td>{{ u.created_at | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <div class="ops">
+              <button class="btn-icon" (click)="toggleActive(u)"
+                      [title]="u.is_active ? 'Desactivar' : 'Activar'">
+                <i class="bi" [ngClass]="u.is_active ? 'bi-person-check' : 'bi-person-x'"
+                   [style.color]="u.is_active ? '#2E7D32' : '#C62828'"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filtered.length === 0">
+          <td colspan="7" class="empty-row">Nenhum formador adicionado</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Adicionar Formador -->
+<div class="modal-backdrop" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()" #modalRef>
+
+    <div class="modal-header">
+      <div class="modal-title">
+        <i class="bi bi-plus-circle"></i>
+        <span>Adicionar Formador</span>
+      </div>
+      <button class="modal-close" (click)="closeModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <div class="modal-subheader">
+      <i class="bi bi-info-circle"></i> Informações do formador
+    </div>
+
+    <div class="modal-body two-cols">
+      <div class="col">
+        <div class="field">
+          <label>Nome do formador *</label>
+          <input type="text" [(ngModel)]="form.name" placeholder="Nome completo">
+        </div>
+        <div class="field">
+          <label>E-mail *</label>
+          <input type="email" [(ngModel)]="form.email" placeholder="email@exemplo.ao">
+        </div>
+        <div class="field">
+          <label>Senha *</label>
+          <input type="password" [(ngModel)]="form.password" placeholder="Mínimo 6 caracteres">
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="field">
+          <label>Telefone</label>
+          <input type="text" [(ngModel)]="form.phone" placeholder="9XXXXXXXX">
+        </div>
+        <div class="field">
+          <label>Descrição / Especialidade</label>
+          <textarea [(ngModel)]="form.description" placeholder="Área de especialidade do formador" rows="5"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-error" *ngIf="errorMsg">
+      <i class="bi bi-exclamation-circle"></i> {{ errorMsg }}
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-outline" (click)="closeModal()">Cancelar</button>
+      <button class="btn-primary" (click)="save()" [disabled]="saving">
+        <span *ngIf="!saving">Adicionar formador</span>
+        <span *ngIf="saving"><i class="bi bi-arrow-repeat spin"></i></span>
+      </button>
+    </div>
+  </div>
+</div>

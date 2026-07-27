@@ -1,98 +1,67 @@
-const ClassRepository = require('../repositories/ClassRepository');
+// src/controllers/CourseController.js
+const CourseService = require('../services/CourseService');
 
-class ClassController {
-  async create(req, res) {
-    const { course_id, instructor_id, name, start_date, end_date, max_students, schedule } = req.body;
+class CourseController {
 
-    try {
-      const turma = await ClassRepository.create({
-        course_id,
-        instructor_id,
-        name,
-        start_date,
-        end_date,
-        max_students,
-        schedule
-      });
-
-      res.status(201).json({ success: true, data: turma.toJSON() });
-    } catch (err) {
-      console.error('Erro ao criar turma:', err);
-      res.status(500).json({ success: false, message: 'Erro ao criar turma' });
-    }
-  }
-
-  //async list(req, res) {
-    //try {
-      //const turmas = await ClassRepository.findAllActive();
-     // res.json({ success: true, data: turmas.map(t => t.toJSON()) });
-    //} catch (err) {
-     // res.status(500).json({ success: false, message: 'Erro ao listar turmas' });
-   // }
-  //}
-
+  // GET /api/courses — lista todos (autenticado)
   async list(req, res) {
     try {
-      let turmas;
-  
-      if (req.user.role === 'admin') {
-        turmas = await ClassRepository.findAllActive();
-      } else if (req.user.role === 'instructor') {
-        turmas = await ClassRepository.findByInstructorId(req.user.id);
-      } else {
-        return res.status(403).json({ success: false, message: 'Acesso negado' });
-      }
-  
-      res.json({ success: true, data: turmas.map(t => t.toJSON()) });
+      const courses = await CourseService.getAll();
+      res.json({ success: true, data: courses });
     } catch (err) {
-      console.error('Erro ao listar turmas:', err);
-      res.status(500).json({ success: false, message: 'Erro ao listar turmas' });
+      res.status(500).json({ success: false, message: err.message });
     }
   }
-  
 
+  // GET /api/courses/active — lista só os activos (público)
+  async listActive(req, res) {
+    try {
+      const courses = await CourseService.getActive();
+      res.json({ success: true, data: courses });
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  // POST /api/courses
+  async create(req, res) {
+    try {
+      const course = await CourseService.create(req.body);
+      res.status(201).json({ success: true, data: course });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message });
+    }
+  }
+
+  // PUT /api/courses/:id
   async update(req, res) {
-    const id = parseInt(req.params.id);
-    const { course_id, instructor_id, name, start_date, end_date, max_students, schedule } = req.body;
-
     try {
-      const updated = await ClassRepository.update(id, {
-        course_id,
-        instructor_id,
-        name,
-        start_date,
-        end_date,
-        max_students,
-        schedule
-      });
-
-      res.json({ success: true, data: updated.toJSON() });
+      const course = await CourseService.update(parseInt(req.params.id), req.body);
+      res.json({ success: true, data: course });
     } catch (err) {
-      res.status(500).json({ success: false, message: 'Erro ao atualizar turma' });
+      res.status(400).json({ success: false, message: err.message });
     }
   }
 
+  // PUT /api/courses/:id/deactivate
   async deactivate(req, res) {
-    const id = parseInt(req.params.id);
-
     try {
-      await ClassRepository.deactivate(id);
-      res.json({ success: true, message: 'Turma desativada com sucesso' });
+      await CourseService.setActive(parseInt(req.params.id), false);
+      res.json({ success: true, message: 'Curso desactivado' });
     } catch (err) {
-      res.status(500).json({ success: false, message: 'Erro ao desativar turma' });
+      res.status(400).json({ success: false, message: err.message });
     }
   }
 
+  // PUT /api/courses/:id/reactivate
   async reactivate(req, res) {
-    const id = parseInt(req.params.id);
-
     try {
-      await ClassRepository.reactivate(id);
-      res.json({ success: true, message: 'Turma reativada com sucesso' });
+      await CourseService.setActive(parseInt(req.params.id), true);
+      res.json({ success: true, message: 'Curso activado' });
     } catch (err) {
-      res.status(500).json({ success: false, message: 'Erro ao reativar turma' });
+      res.status(400).json({ success: false, message: err.message });
     }
   }
 }
 
-module.exports = new ClassController();
+module.exports = new CourseController();

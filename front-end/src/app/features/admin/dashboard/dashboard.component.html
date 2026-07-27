@@ -1,0 +1,92 @@
+<!-- src/app/features/admin/dashboard/dashboard.component.html -->
+<div class="admin-page" #page>
+
+  <div class="page-title-row">
+    <h1>Painel de Controlo</h1>
+  </div>
+
+  <!-- Cards de estatísticas -->
+  <div class="stats-grid" #statsGrid>
+    <div class="stat-card" *ngFor="let s of statCards" #statCard>
+      <div class="stat-left">
+        <span class="stat-label">{{ s.label }}</span>
+        <span class="stat-value">{{ s.value }}</span>
+      </div>
+      <div class="stat-icon" [style.background]="s.color + '18'">
+        <i class="bi {{ s.icon }}" [style.color]="s.color"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráficos -->
+  <div class="charts-row" #chartsRow>
+
+    <!-- Inscrições por mês -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3>Inscrições por Mês</h3>
+        <span class="chart-sub">Ano corrente</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas #lineChart></canvas>
+      </div>
+    </div>
+
+    <!-- Pagamentos por estado -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3>Estado dos Pagamentos</h3>
+        <span class="chart-sub">Distribuição actual</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas #barChart></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Inscrições recentes -->
+  <div class="table-card" #tableCard>
+    <div class="table-header">
+      <h3><i class="bi bi-clock-history"></i> Inscrições Recentes</h3>
+      <a routerLink="/admin/enrollments" class="link-red">Ver todas</a>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Estudante</th>
+          <th>Curso</th>
+          <th>Turma</th>
+          <th>Data</th>
+          <th>Estado</th>
+          <th>Pagamento</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let e of recentEnrollments">
+          <td>{{ e.id }}</td>
+          <td>{{ e.student_name }}</td>
+          <td>{{ e.course_name }}</td>
+          <td>{{ e.class_name }}</td>
+          <td>{{ e.enrollment_date | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <span class="badge" [ngClass]="'badge-' + e.status">
+              {{ statusLabel(e.status) }}
+            </span>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="e.payment_status === 'paid' ? 'badge-active' : 'badge-pending'">
+              {{ e.payment_status === 'paid' ? 'Pago' : 'Pendente' }}
+            </span>
+          </td>
+        </tr>
+        <tr *ngIf="recentEnrollments.length === 0">
+          <td colspan="7" class="empty-row">Sem inscrições recentes.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

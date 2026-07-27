@@ -1,0 +1,152 @@
+// src/app/features/student/my-grades/my-grades.component.scss
+$red:    #D32F2F;
+$white:  #FFFFFF;
+$text:   #1A1A1A;
+$muted:  #6B6B6B;
+$border: #E0E0E0;
+$bg:     #F8F9FA;
+
+.student-page { background: $bg; min-height: calc(100vh - 56px); }
+
+// ─── Cabeçalho vermelho ───────────────────────────────────────
+.grades-header {
+  background: $red;
+  padding: 28px 32px;
+
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+
+    h1 {
+      color: $white;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+  }
+}
+
+// ─── Container principal ──────────────────────────────────────
+.grades-container {
+  max-width: 1100px;
+  margin: 32px auto;
+  padding: 0 32px;
+}
+
+// ─── Filtro ───────────────────────────────────────────────────
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+  background: $white;
+  padding: 16px 20px;
+  border-radius: 10px;
+  border: 1px solid $border;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+
+  label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: $text;
+    white-space: nowrap;
+  }
+
+  select {
+    flex: 1;
+    padding: 9px 14px;
+    border: 1px solid $border;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    color: $text;
+    outline: none;
+    font-family: inherit;
+    &:focus { border-color: $red; }
+  }
+}
+
+// ─── Boletim ──────────────────────────────────────────────────
+.boletim-wrap {
+  background: $white;
+  border-radius: 10px;
+  border: 1px solid $border;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+// Barra de identificação do aluno (fiel ao Figma)
+.student-id-bar {
+  background: $red;
+  color: $white;
+  display: flex;
+  gap: 40px;
+  padding: 12px 20px;
+  font-size: 0.88rem;
+  font-weight: 500;
+
+  strong { font-weight: 700; }
+
+  .course-span { margin-left: auto; }
+}
+
+// ─── Tabela de notas ──────────────────────────────────────────
+.grades-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+
+  th {
+    background: #FFF5F5;
+    color: $text;
+    font-weight: 700;
+    padding: 11px 16px;
+    text-align: left;
+    border: 1px solid $border;
+
+    &.notas-header {
+      text-align: center;
+      background: #FFEBEE;
+      color: $red;
+    }
+  }
+
+  td {
+    padding: 11px 16px;
+    color: $text;
+    border: 1px solid #F0F0F0;
+  }
+
+  tr:nth-child(even) td { background: #FAFAFA; }
+
+  .score {
+    text-align: center;
+    font-weight: 600;
+
+    &.pass { color: #2E7D32; }
+    &.fail { color: $red; }
+  }
+
+  tfoot .average-row {
+    td {
+      background: #FFF5F5;
+      border-top: 2px solid $border;
+      font-size: 0.92rem;
+    }
+  }
+}
+
+// ─── Empty states ─────────────────────────────────────────────
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: $muted;
+
+  i { font-size: 2.5rem; display: block; margin-bottom: 12px; opacity: 0.4; }
+  p { font-size: 0.88rem; line-height: 1.6; }
+
+  &.centered {
+    background: $white;
+    border-radius: 10px;
+    border: 1px solid $border;
+    padding: 60px 20px;
+  }
+}

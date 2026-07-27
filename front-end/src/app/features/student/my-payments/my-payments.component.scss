@@ -1,0 +1,126 @@
+// src/app/features/student/my-payments/my-payments.component.scss
+$red:    #D32F2F;
+$white:  #FFFFFF;
+$text:   #1A1A1A;
+$muted:  #6B6B6B;
+$border: #E0E0E0;
+$bg:     #F8F9FA;
+
+.student-page { background: $bg; min-height: calc(100vh - 56px); }
+
+.page-header {
+  background: $red;
+  padding: 28px 32px;
+  .header-inner { max-width: 1100px; margin: 0 auto; }
+  h1 { color: #fff; font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  p  { color: rgba(255,255,255,0.82); font-size: 0.88rem; }
+}
+
+.page-body { max-width: 1100px; margin: 28px auto; padding: 0 32px; }
+
+// Resumo
+.summary-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  background: $white;
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+
+  i { font-size: 1.8rem; color: #E65100; }
+  &.green i { color: #2E7D32; }
+  &.red   i { color: $red; }
+
+  .val { display: block; font-size: 1.6rem; font-weight: 800; color: $text; line-height: 1; }
+  .lbl { font-size: 0.78rem; color: $muted; font-weight: 500; }
+}
+
+// Tabela
+.table-card {
+  background: $white;
+  border-radius: 10px;
+  border: 1px solid $border;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  overflow: hidden;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+
+  th {
+    background: #FFF5F5;
+    padding: 11px 14px;
+    text-align: left;
+    font-weight: 700;
+    color: $text;
+    border-bottom: 1px solid $border;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 12px 14px;
+    color: $text;
+    border-bottom: 1px solid #F5F5F5;
+    white-space: nowrap;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #FAFAFA; }
+}
+
+.ref-code {
+  font-weight: 700;
+  color: $red;
+  letter-spacing: 1.5px;
+  font-size: 0.9rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  &.badge-active    { background: #E8F5E9; color: #2E7D32; }
+  &.badge-pending   { background: #FFF8E1; color: #E65100; }
+  &.badge-cancelled { background: #FFEBEE; color: #C62828; }
+}
+
+.empty-state {
+  padding: 60px 20px;
+  text-align: center;
+  color: $muted;
+  i { font-size: 2.5rem; display: block; margin-bottom: 12px; opacity: 0.35; }
+  p { font-size: 0.88rem; }
+}
+
+.loading-row {
+  text-align: center;
+  padding: 40px;
+  color: $muted;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.spin { animation: spin 0.8s linear infinite; display: inline-block; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+@media (max-width: 768px) {
+  .page-body { padding: 0 16px; }
+  .summary-row { flex-direction: column; }
+  .data-table { font-size: 0.78rem; }
+}

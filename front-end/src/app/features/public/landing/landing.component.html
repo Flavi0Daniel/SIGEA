@@ -1,0 +1,169 @@
+<!-- src/app/features/public/landing/landing.component.html -->
+
+<!-- ─── NAVBAR ──────────────────────────────────────────────── -->
+<nav class="sigea-nav">
+  <div class="nav-container">
+    <a class="brand" routerLink="/">SIGEA</a>
+
+    <div class="nav-actions">
+      <ng-container *ngIf="!currentUser; else loggedInMenu">
+        <button class="btn-outline" (click)="openLogin()">Entrar</button>
+        <button class="btn-primary" (click)="openRegister()">Cadastrar-se</button>
+      </ng-container>
+
+      <ng-template #loggedInMenu>
+        <div class="user-menu" (click)="toggleUserMenu()" #userMenuRef>
+          <i class="bi bi-person-circle"></i>
+          <span>{{ currentUser?.name }}</span>
+          <i class="bi bi-chevron-down"></i>
+
+          <div class="dropdown" *ngIf="userMenuOpen">
+            <a (click)="goToDashboard()"><i class="bi bi-person"></i> Perfil</a>
+            <a (click)="goTo('boletim')"><i class="bi bi-journal-text"></i> Boletim</a>
+            <a (click)="goTo('certificados')"><i class="bi bi-patch-check"></i> Certificado</a>
+            <hr>
+            <a (click)="logout()" class="logout"><i class="bi bi-box-arrow-right"></i> Sair</a>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</nav>
+
+<!-- ─── HERO ────────────────────────────────────────────────── -->
+<section class="hero" #heroSection>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1 #heroTitle>Faça a sua matrícula aqui<br>no nosso portal</h1>
+    <p #heroSubtitle>
+      Aqui encontrará os melhores cursos presenciais, venha aprender.<br>
+      Se inscreva na aplicação para estar mais informado.
+    </p>
+  </div>
+</section>
+
+<!-- ─── BARRA DE BENEFÍCIOS (vermelha) ─────────────────────── -->
+<section class="benefits-bar" #benefitsBar>
+  <div class="benefit" #benefit1>
+    <i class="bi bi-hand-thumbs-up-fill"></i>
+    <span>Cursos de Qualidade</span>
+  </div>
+  <div class="benefit" #benefit2>
+    <i class="bi bi-check-circle-fill"></i>
+    <span>100% Prático</span>
+  </div>
+  <div class="benefit" #benefit3>
+    <i class="bi bi-award-fill"></i>
+    <span>Certificação</span>
+  </div>
+</section>
+
+<!-- ─── CURSOS EM DESTAQUE ──────────────────────────────────── -->
+<section class="section-featured" #featuredSection>
+  <div class="section-header">
+    <div class="divider-line"></div>
+    <h2>Cursos em Destaques</h2>
+    <div class="divider-line"></div>
+  </div>
+
+  <div class="courses-carousel">
+    <button class="carousel-btn prev" (click)="prevSlide()">
+      <i class="bi bi-chevron-left"></i>
+    </button>
+
+    <div class="courses-track" #coursesTrack>
+      <div class="course-card" *ngFor="let course of featuredCourses" #courseCard>
+        <div class="card-img">
+          <span class="date-badge">{{ course.created_at | date:'dd MMM, yyyy' }}</span>
+          <img [src]="getCourseImage(course)" [alt]="course.name" (error)="onImgError($event)">
+        </div>
+        <div class="card-body">
+          <h3>{{ course.name }}</h3>
+          <p>{{ course.description | slice:0:100 }}{{ course.description && course.description.length > 100 ? '...' : '' }}</p>
+          <div class="card-actions">
+            <button class="btn-sm-outline" (click)="openCourseDetail(course)">Descrição</button>
+            <button class="btn-sm-primary" (click)="openEnroll(course)">Matricular-se</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="carousel-btn next" (click)="nextSlide()">
+      <i class="bi bi-chevron-right"></i>
+    </button>
+  </div>
+</section>
+
+<!-- ─── CURSOS POR CATEGORIA ────────────────────────────────── -->
+<section class="section-categories" #categoriesSection>
+  <div class="section-header">
+    <div class="divider-line"></div>
+    <h2>Cursos por Categoria</h2>
+    <div class="divider-line"></div>
+  </div>
+
+  <div class="categories-carousel">
+    <button class="carousel-btn prev" (click)="prevCategory()">
+      <i class="bi bi-chevron-left"></i>
+    </button>
+
+    <div class="categories-track">
+      <div class="category-card" *ngFor="let cat of categories; let i = index"
+           #categoryCard (click)="filterByCategory(cat.name)">
+        <i class="bi {{ cat.icon }}"></i>
+        <h3>{{ cat.name }}</h3>
+        <p>{{ cat.description }}</p>
+        <div class="cat-number">{{ i + 1 }}</div>
+      </div>
+    </div>
+
+    <button class="carousel-btn next" (click)="nextCategory()">
+      <i class="bi bi-chevron-right"></i>
+    </button>
+  </div>
+</section>
+
+<!-- ─── FOOTER ───────────────────────────────────────────────── -->
+<footer class="sigea-footer" #footerSection>
+  <div class="footer-container">
+    <div class="footer-left">
+      <h4>Localização</h4>
+      <p>Centro de Formação Arena e Coliseu Académico<br>Luanda, Angola</p>
+      <h4>Siga-nos</h4>
+      <div class="social-icons">
+        <a href="#"><i class="bi bi-facebook"></i></a>
+        <a href="#"><i class="bi bi-twitter-x"></i></a>
+        <a href="#"><i class="bi bi-instagram"></i></a>
+        <a href="#"><i class="bi bi-youtube"></i></a>
+      </div>
+      <p class="copy">2026 Política de privacidade</p>
+    </div>
+
+    <div class="footer-right">
+      <h4>Formulário de Contacto</h4>
+      <form class="contact-form" (ngSubmit)="submitContact()">
+        <input type="text"    [(ngModel)]="contactForm.name"    name="name"    placeholder="Nome">
+        <input type="email"   [(ngModel)]="contactForm.email"   name="email"   placeholder="E-mail">
+        <textarea             [(ngModel)]="contactForm.message" name="message" placeholder="Descrição" rows="4"></textarea>
+        <button type="submit" class="btn-primary">Enviar</button>
+      </form>
+    </div>
+  </div>
+</footer>
+
+<!-- ─── MODAIS ────────────────────────────────────────────────── -->
+<app-login-modal    *ngIf="showLogin"    (close)="closeModals()" (switchToRegister)="openRegister()"></app-login-modal>
+<app-register-modal *ngIf="showRegister" (close)="closeModals()" (switchToLogin)="openLogin()"></app-register-modal>
+<app-course-detail-modal
+  *ngIf="selectedCourse"
+  [course]="selectedCourse"
+  (close)="selectedCourse = null"
+  (enroll)="openEnroll($any($event))">
+</app-course-detail-modal>
+ 
+<app-enroll-modal
+  *ngIf="enrollCourse"
+  [course]="enrollCourse"
+  (close)="enrollCourse = null">
+</app-enroll-modal>
+ 

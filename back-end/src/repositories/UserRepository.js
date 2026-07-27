@@ -12,15 +12,21 @@ class UserRepository {
         return rows.length > 0 ? new User(rows[0]) : null;
     }
 
-    // Criar novo usuário
     async create(userData) {
-        const [result] = await db.execute(`
-            INSERT INTO tbl_user (name, email, password, phone, role, avatar) 
-            VALUES (?, ?, ?, ?, ?, ?)
-        `, [userData.name, userData.email, userData.password, userData.phone, userData.role, userData.avatar]);
-        
-        return this.findById(result.insertId);
-    }
+    const [result] = await db.execute(`
+        INSERT INTO tbl_user (name, email, password, phone, role, avatar) 
+        VALUES (?, ?, ?, ?, ?, ?)
+    `, [
+        userData.name,
+        userData.email,
+        userData.password,
+        userData.phone  || null,
+        userData.role   || 'student',
+        userData.avatar || null
+    ]);
+    
+    return this.findById(result.insertId);
+}
 
     // Buscar usuário por ID
     async findById(id) {

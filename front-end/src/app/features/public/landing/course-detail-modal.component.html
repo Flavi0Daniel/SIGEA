@@ -1,0 +1,40 @@
+<!-- course-detail-modal.component.html -->
+<div class="modal-backdrop" (click)="onBackdropClick($event)">
+  <div class="modal-box detail-box" #modalBox>
+
+    <button class="modal-close" (click)="close.emit()">
+      <i class="bi bi-x-lg"></i>
+    </button>
+
+    <!-- Hero imagem do curso -->
+    <div class="detail-hero">
+      <img [src]="getCourseImage()" [alt]="course.name" (error)="onImgError($event)">
+      <div class="detail-hero-overlay">
+        <h2>{{ course.name }}</h2>
+      </div>
+    </div>
+
+    <div class="detail-body">
+      <div class="detail-left">
+        <p class="detail-desc">{{ course.description || 'Sem descrição disponível.' }}</p>
+
+        <div class="detail-meta">
+          <span><i class="bi bi-clock"></i> {{ course.duration_hours }}h de formação</span>
+          <span *ngIf="course.category"><i class="bi bi-tag"></i> {{ course.category }}</span>
+        </div>
+      </div>
+
+      <div class="detail-right">
+        <div class="price-box">
+          <span class="price-label">Preço</span>
+          <span class="price-value">{{ course.price | number:'1.2-2' }} kz</span>
+        </div>
+
+        <button class="btn-enroll" (click)="onEnroll()">
+          <i class="bi bi-pencil-square"></i> Matricular-se
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

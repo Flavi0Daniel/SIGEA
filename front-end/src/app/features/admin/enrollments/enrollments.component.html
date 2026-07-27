@@ -1,0 +1,46 @@
+<!-- src/app/features/admin/enrollments/enrollments.component.html -->
+<div class="admin-page">
+  <div class="page-header">
+    <div>
+      <h1>Inscrições</h1>
+      <p>Gestão de todas as inscrições</p>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <i class="bi bi-search"></i>
+    <input type="text" [(ngModel)]="search" placeholder="Pesquisar por aluno ou curso..." (input)="applyFilter()">
+  </div>
+
+  <div class="table-card">
+    <div class="loading-row" *ngIf="loading"><i class="bi bi-arrow-repeat spin"></i> A carregar...</div>
+
+    <table class="data-table" *ngIf="!loading">
+      <thead>
+        <tr>
+          <th>ID</th><th>Estudante</th><th>Curso</th><th>Turma</th>
+          <th>Data</th><th>Estado</th><th>Pagamento</th><th>Operações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let e of filtered">
+          <td>{{ e.id }}</td>
+          <td><strong>{{ e.student_name }}</strong></td>
+          <td>{{ e.course_name }}</td>
+          <td>{{ e.class_name }}</td>
+          <td>{{ e.enrollment_date | date:'dd/MM/yyyy' }}</td>
+          <td><span class="badge" [ngClass]="'badge-' + e.status">{{ statusLabel(e.status) }}</span></td>
+          <td><span class="badge" [ngClass]="e.payment_status === 'paid' ? 'badge-active' : 'badge-pending'">{{ e.payment_status === 'paid' ? 'Pago' : 'Pendente' }}</span></td>
+          <td>
+            <div class="ops">
+              <button class="btn-icon edit" *ngIf="e.status === 'pending'" (click)="activate(e.id)" title="Activar"><i class="bi bi-check-circle"></i></button>
+              <button class="btn-icon edit" *ngIf="e.status === 'active'"  (click)="complete(e.id)" title="Concluir"><i class="bi bi-check2-all"></i></button>
+              <button class="btn-icon danger" *ngIf="e.status !== 'cancelled' && e.status !== 'completed'" (click)="cancel(e.id)" title="Cancelar"><i class="bi bi-x-circle"></i></button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filtered.length === 0"><td colspan="8" class="empty-row">Sem inscrições registadas.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>

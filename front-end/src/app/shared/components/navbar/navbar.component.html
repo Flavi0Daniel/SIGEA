@@ -1,0 +1,28 @@
+<!-- src/app/shared/components/navbar/navbar.component.html -->
+<nav class="sigea-topnav">
+  <div class="topnav-inner">
+    <span class="brand">SIGEA</span>
+
+    <div class="user-menu" (click)="toggleMenu()" #menuRef>
+      <i class="bi bi-person-circle"></i>
+      <span>{{ user?.name }}</span>
+      <i class="bi bi-chevron-down" [class.rotated]="open"></i>
+
+      <div class="dropdown" *ngIf="open">
+        <a (click)="navigate('profile')">
+          <i class="bi bi-person"></i> Perfil
+        </a>
+        <a (click)="navigate('my-grades')">
+          <i class="bi bi-journal-text"></i> Boletim
+        </a>
+        <a (click)="navigate('my-certificates')">
+          <i class="bi bi-patch-check"></i> Certificado
+        </a>
+        <hr>
+        <a (click)="logout()" class="logout">
+          <i class="bi bi-box-arrow-right"></i> Sair
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,88 @@
+<!-- src/app/features/student/my-payments/my-payments.component.html -->
+<app-navbar></app-navbar>
+
+<div class="student-page">
+
+  <div class="page-header" #pageHeader>
+    <div class="header-inner">
+      <h1><i class="bi bi-credit-card"></i> Os Meus Pagamentos</h1>
+      <p>Histórico e estado dos seus pagamentos.</p>
+    </div>
+  </div>
+
+  <div class="page-body" #pageBody>
+
+    <!-- Resumo -->
+    <div class="summary-row">
+      <div class="summary-card">
+        <i class="bi bi-clock-history"></i>
+        <div>
+          <span class="val">{{ pendingCount }}</span>
+          <span class="lbl">Pendentes</span>
+        </div>
+      </div>
+      <div class="summary-card green">
+        <i class="bi bi-check-circle"></i>
+        <div>
+          <span class="val">{{ paidCount }}</span>
+          <span class="lbl">Pagos</span>
+        </div>
+      </div>
+      <div class="summary-card red">
+        <i class="bi bi-x-circle"></i>
+        <div>
+          <span class="val">{{ failedCount }}</span>
+          <span class="lbl">Falhados</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="table-card">
+      <div class="loading-row" *ngIf="loading">
+        <i class="bi bi-arrow-repeat spin"></i> A carregar...
+      </div>
+
+      <table class="data-table" *ngIf="!loading && payments.length > 0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Curso</th>
+            <th>Turma</th>
+            <th>Método</th>
+            <th>Entidade</th>
+            <th>Referência</th>
+            <th>Valor</th>
+            <th>Estado</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of payments">
+            <td>{{ p.id }}</td>
+            <td>{{ p.course_name || '—' }}</td>
+            <td>{{ p.class_name || '—' }}</td>
+            <td>{{ methodLabel(p.payment_method) }}</td>
+            <td>{{ p.entity || '—' }}</td>
+            <td>
+              <span class="ref-code" *ngIf="p.reference">{{ p.reference }}</span>
+              <span *ngIf="!p.reference">—</span>
+            </td>
+            <td><strong>{{ p.amount | number:'1.2-2' }} kz</strong></td>
+            <td>
+              <span class="badge" [ngClass]="statusClass(p.status)">
+                {{ statusLabel(p.status) }}
+              </span>
+            </td>
+            <td>{{ (p.payment_date || p.created_at) | date:'dd/MM/yyyy' }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="empty-state" *ngIf="!loading && payments.length === 0">
+        <i class="bi bi-receipt"></i>
+        <p>Sem pagamentos registados.</p>
+      </div>
+    </div>
+  </div>
+</div>

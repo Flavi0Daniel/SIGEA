@@ -1,7 +1,6 @@
 const EnrollmentRepository = require('../repositories/EnrollmentRepository');
-const ClassRepository = require('../repositories/ClassRepository');
-const PaymentRepository = require('../repositories/PaymentRepository');
-const ProxyPayService = require('./ProxyPayService');
+const ClassRepository      = require('../repositories/ClassRepository');
+const AppyPayService       = require('./AppyPayService');
 
 class EnrollmentService {
 
@@ -12,10 +11,10 @@ class EnrollmentService {
       throw new Error('Turma não encontrada ou inactiva');
     }
 
-    // 2. Verifica se já está matriculado
+    // 2. Verifica matrícula duplicada
     const existing = await EnrollmentRepository.findByStudentAndClass(studentId, classId);
     if (existing && ['pending', 'active'].includes(existing.status)) {
-      throw new Error('Já existe uma matrícula activa nesta turma');
+      throw new Error('Já existe uma inscrição activa nesta turma');
     }
 
     // 3. Verifica capacidade
@@ -27,17 +26,15 @@ class EnrollmentService {
     // 4. Cria a inscrição
     const enrollment = await EnrollmentRepository.create({ student_id: studentId, class_id: classId });
 
-    // 5. Gera pagamento via ProxyPay
-    const payment = await ProxyPayService.createPaymentForEnrollment(enrollment);
+    // 5. Gera cobrança na AppyPay / simulador
+    const payment = await AppyPayService.createPaymentForEnrollment(enrollment);
 
     return { enrollment, payment };
   }
 
-  // Admin activa manualmente (ex: após confirmar pagamento em dinheiro)
   async activate(enrollmentId) {
     const enrollment = await EnrollmentRepository.findById(enrollmentId);
     if (!enrollment) throw new Error('Inscrição não encontrada');
-
     await EnrollmentRepository.updateStatus(enrollmentId, 'active');
     await EnrollmentRepository.updatePaymentStatus(enrollmentId, 'paid');
     return EnrollmentRepository.findById(enrollmentId);
@@ -46,18 +43,18 @@ class EnrollmentService {
   async cancel(enrollmentId, requestingUserId, requestingRole) {
     const enrollment = await EnrollmentRepository.findById(enrollmentId);
     if (!enrollment) throw new Error('Inscrição não encontrada');
-
     if (requestingRole !== 'admin' && enrollment.student_id !== requestingUserId) {
       throw new Error('Sem permissão para cancelar esta inscrição');
     }
-
     return EnrollmentRepository.updateStatus(enrollmentId, 'cancelled');
   }
 
   async complete(enrollmentId) {
     const enrollment = await EnrollmentRepository.findById(enrollmentId);
     if (!enrollment) throw new Error('Inscrição não encontrada');
-    if (enrollment.status !== 'active') throw new Error('Só inscrições activas podem ser concluídas');
+    if (enrollment.status !== 'active') {
+      throw new Error('Só inscrições activas podem ser concluídas');
+    }
     return EnrollmentRepository.markCompleted(enrollmentId);
   }
 

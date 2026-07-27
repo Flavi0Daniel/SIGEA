@@ -1,0 +1,516 @@
+// src/app/features/public/landing/landing.component.scss
+
+// ─── Variáveis ────────────────────────────────────────────────
+$red:        #D32F2F;
+$red-dark:   #B71C1C;
+$red-light:  #FFEBEE;
+$white:      #FFFFFF;
+$text:       #1A1A1A;
+$text-muted: #6B6B6B;
+$border:     #E0E0E0;
+$shadow:     0 2px 12px rgba(0,0,0,0.10);
+$radius:     8px;
+
+// ─── NAVBAR ───────────────────────────────────────────────────
+.sigea-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  background: $white;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.10);
+
+  .nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: $red;
+    text-decoration: none;
+    letter-spacing: 1px;
+  }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .user-menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: $radius;
+    font-weight: 500;
+    color: $text;
+    transition: background 0.2s;
+
+    &:hover { background: $red-light; }
+
+    i.bi-person-circle { font-size: 1.3rem; color: $red; }
+
+    .dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: $white;
+      border: 1px solid $border;
+      border-radius: $radius;
+      box-shadow: $shadow;
+      min-width: 180px;
+      overflow: hidden;
+      animation: fadeDown 0.2s ease;
+
+      a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        color: $text;
+        cursor: pointer;
+        transition: background 0.15s;
+
+        &:hover { background: $red-light; }
+        &.logout { color: $red; }
+        i { color: $red; }
+      }
+
+      hr { margin: 4px 0; border: none; border-top: 1px solid $border; }
+    }
+  }
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ─── BOTÕES ───────────────────────────────────────────────────
+.btn-primary {
+  background: $red;
+  color: $white;
+  border: none;
+  padding: 9px 22px;
+  border-radius: $radius;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  &:hover { background: $red-dark; transform: translateY(-1px); }
+}
+
+.btn-outline {
+  background: transparent;
+  color: $red;
+  border: 1.5px solid $red;
+  padding: 8px 20px;
+  border-radius: $radius;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover { background: $red; color: $white; }
+}
+
+.btn-sm-primary {
+  background: $red;
+  color: $white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  &:hover { background: $red-dark; }
+}
+
+.btn-sm-outline {
+  background: transparent;
+  color: $red;
+  border: 1.5px solid $red;
+  padding: 5px 13px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover { background: $red; color: $white; }
+}
+
+// ─── HERO ─────────────────────────────────────────────────────
+.hero {
+  position: relative;
+  margin-top: 60px;
+  height: 340px;
+  background: url('./../../../../assets/images/hero-bg.png') center/cover no-repeat;
+  display: flex;
+  align-items: center;
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.52);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    padding: 0 60px;
+    max-width: 600px;
+
+    h1 {
+      color: $white;
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.3;
+      margin-bottom: 14px;
+    }
+
+    p {
+      color: rgba(255,255,255,0.88);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+  }
+}
+
+// ─── BARRA DE BENEFÍCIOS ──────────────────────────────────────
+.benefits-bar {
+  background: $red;
+  display: flex;
+  justify-content: center;
+  gap: 80px;
+  padding: 28px 40px;
+
+  .benefit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: $white;
+
+    i {
+      font-size: 2rem;
+    }
+
+    span {
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+  }
+}
+
+// ─── SECTION HEADER ───────────────────────────────────────────
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 36px;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $text;
+    white-space: nowrap;
+  }
+
+  .divider-line {
+    flex: 1;
+    max-width: 180px;
+    height: 1px;
+    background: $border;
+  }
+}
+
+// ─── CURSOS EM DESTAQUE ───────────────────────────────────────
+.section-featured {
+  padding: 60px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .courses-carousel {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    overflow: hidden;
+  }
+
+  .courses-track {
+    display: flex;
+    gap: 24px;
+    will-change: transform;
+  }
+}
+
+.course-card {
+  min-width: 300px;
+  max-width: 300px;
+  background: $white;
+  border-radius: $radius;
+  box-shadow: $shadow;
+  overflow: hidden;
+  border: 1px solid $border;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+  }
+
+  .card-img {
+    position: relative;
+    height: 160px;
+    background: #c9a0a0;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .date-badge {
+      position: absolute;
+      top: 10px; left: 10px;
+      background: $red;
+      color: $white;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+  }
+
+  .card-body {
+    padding: 16px;
+
+    h3 {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: $text;
+      margin-bottom: 8px;
+    }
+
+    p {
+      font-size: 0.82rem;
+      color: $text-muted;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+    }
+  }
+}
+
+// ─── CAROUSEL BUTTONS ─────────────────────────────────────────
+.carousel-btn {
+  background: $white;
+  border: 1.5px solid $border;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  z-index: 2;
+  transition: all 0.2s;
+  color: $text;
+
+  &:hover {
+    background: $red;
+    color: $white;
+    border-color: $red;
+  }
+
+  i { font-size: 1rem; }
+}
+
+// ─── CURSOS POR CATEGORIA ──────────────────────────────────────
+.section-categories {
+  background: $red-light;
+  padding: 60px 40px;
+
+  .section-header h2 { color: $text; }
+
+  .categories-carousel {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .categories-track {
+    display: flex;
+    gap: 24px;
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+.category-card {
+  flex: 1;
+  max-width: 320px;
+  background: $white;
+  border: 1.5px dashed $red;
+  border-radius: $radius;
+  padding: 32px 24px 24px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $shadow;
+  }
+
+  i {
+    font-size: 2rem;
+    color: $red;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $text;
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-size: 0.82rem;
+    color: $text-muted;
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+
+  .cat-number {
+    width: 44px;
+    height: 44px;
+    background: $red;
+    color: $white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin: 0 auto;
+  }
+}
+
+// ─── FOOTER ───────────────────────────────────────────────────
+.sigea-footer {
+  background: $red-light;
+  border-top: 1px solid $border;
+  padding: 60px 40px 32px;
+
+  .footer-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    gap: 80px;
+    align-items: flex-start;
+  }
+
+  .footer-left {
+    flex: 1;
+
+    h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: $text;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 0.85rem;
+      color: $text-muted;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .social-icons {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 20px;
+
+      a {
+        color: $text-muted;
+        font-size: 1.3rem;
+        transition: color 0.2s;
+        &:hover { color: $red; }
+      }
+    }
+
+    .copy { font-size: 0.78rem; color: $text-muted; }
+  }
+
+  .footer-right {
+    flex: 1.4;
+
+    h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: $text;
+      margin-bottom: 16px;
+    }
+  }
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  input, textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid $border;
+    border-radius: $radius;
+    font-size: 0.88rem;
+    color: $text;
+    background: $white;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+
+    &:focus { border-color: $red; }
+    &::placeholder { color: #BDBDBD; }
+  }
+
+  textarea { resize: vertical; }
+
+  .btn-primary { align-self: flex-start; }
+}
+
+// ─── RESPONSIVIDADE ───────────────────────────────────────────
+@media (max-width: 768px) {
+  .hero .hero-content { padding: 0 24px; h1 { font-size: 1.4rem; } }
+  .benefits-bar { gap: 30px; padding: 20px 16px; }
+  .section-featured, .section-categories { padding: 40px 16px; }
+  .footer-container { flex-direction: column; gap: 40px; }
+  .section-header .divider-line { max-width: 60px; }
+}

@@ -1,0 +1,156 @@
+// modal.component.scss — partilhado por login e register
+
+$red:       #D32F2F;
+$red-dark:  #B71C1C;
+$white:     #FFFFFF;
+$text:      #1A1A1A;
+$muted:     #6B6B6B;
+$border:    #E0E0E0;
+$radius:    8px;
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-box {
+  background: $white;
+  border-radius: 12px;
+  padding: 40px 36px 32px;
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+
+  h2 {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $red;
+    margin-bottom: 28px;
+  }
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px; right: 16px;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: $muted;
+  cursor: pointer;
+  transition: color 0.2s;
+  &:hover { color: $red; }
+}
+
+.field {
+  margin-bottom: 18px;
+
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $text;
+    margin-bottom: 6px;
+  }
+}
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  i:first-child {
+    position: absolute;
+    left: 13px;
+    color: $red;
+    font-size: 1rem;
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    padding: 11px 40px 11px 38px;
+    border: 1px solid $border;
+    border-radius: $radius;
+    font-size: 0.9rem;
+    color: $text;
+    background: #FFF5F5;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+
+    &:focus { border-color: $red; background: $white; }
+    &::placeholder { color: #BDBDBD; }
+  }
+
+  .toggle-pw {
+    position: absolute;
+    right: 13px;
+    color: $muted;
+    cursor: pointer;
+    font-size: 1rem;
+    pointer-events: all;
+    &:hover { color: $red; }
+  }
+}
+
+.btn-submit {
+  width: 100%;
+  background: $red;
+  color: $white;
+  border: none;
+  padding: 13px;
+  border-radius: $radius;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.2s;
+
+  &:hover:not(:disabled) { background: $red-dark; }
+  &:disabled { opacity: 0.7; cursor: not-allowed; }
+}
+
+.modal-footer-links {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  font-size: 0.85rem;
+  color: $muted;
+
+  a {
+    color: $red;
+    cursor: pointer;
+    font-weight: 600;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+.alert-error {
+  background: #FFEBEE;
+  border: 1px solid #EF9A9A;
+  color: $red-dark;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+// Spinner de loading
+.spin {
+  display: inline-block;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

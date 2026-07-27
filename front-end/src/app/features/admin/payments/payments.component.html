@@ -1,0 +1,65 @@
+<!-- src/app/features/admin/payments/payments.component.html -->
+<div class="admin-page">
+  <div class="page-header">
+    <div><h1>Pagamentos</h1><p>Histórico e gestão de pagamentos</p></div>
+  </div>
+
+  <div class="search-bar">
+    <i class="bi bi-search"></i>
+    <input type="text" [(ngModel)]="search"
+           placeholder="Pesquisar por aluno ou referência..."
+           (input)="applyFilter()">
+  </div>
+
+  <div class="table-card">
+    <div class="loading-row" *ngIf="loading">
+      <i class="bi bi-arrow-repeat spin"></i> A carregar...
+    </div>
+
+    <table class="data-table" *ngIf="!loading">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Estudante</th>
+          <th>Curso</th>
+          <th>Referência</th>
+          <th>Valor</th>
+          <th>Método</th>
+          <th>Estado</th>
+          <th>Data</th>
+          <th>Operações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of filtered">
+          <td>{{ p.id }}</td>
+          <td><strong>{{ p.student_name || '—' }}</strong></td>
+          <td>{{ p.course_name || '—' }}</td>
+          <td>
+            <span class="ref-code" *ngIf="p.reference">{{ p.reference }}</span>
+            <span *ngIf="!p.reference">—</span>
+          </td>
+          <td>{{ p.amount | number:'1.2-2' }} kz</td>
+          <td>{{ methodLabel(p.payment_method) }}</td>
+          <td>
+            <span class="badge" [ngClass]="statusClass(p.status)">
+              {{ statusLabel(p.status) }}
+            </span>
+          </td>
+          <td>{{ (p.payment_date || p.created_at) | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <button class="btn-icon edit"
+                    *ngIf="p.status === 'PENDING'"
+                    (click)="confirmManual(p.id)"
+                    title="Confirmar manualmente">
+              <i class="bi bi-check-circle"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filtered.length === 0">
+          <td colspan="9" class="empty-row">Sem pagamentos registados.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

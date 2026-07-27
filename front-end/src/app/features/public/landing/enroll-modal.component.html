@@ -1,0 +1,170 @@
+<!-- src/app/features/public/landing/enroll-modal.component.html -->
+<div class="modal-backdrop" (click)="onBackdropClick($event)">
+  <div class="modal-box enroll-box" #modalBox>
+
+    <button class="modal-close" (click)="close.emit()">
+      <i class="bi bi-x-lg"></i>
+    </button>
+
+    <!-- ─── PASSO 1: Folha de Matrícula ──────────────────── -->
+    <ng-container *ngIf="step === 1">
+      <div class="enroll-header">
+        <i class="bi bi-file-earmark-text"></i>
+        <h2>Folha de Matrícula</h2>
+      </div>
+
+      <div class="enroll-body two-cols">
+        <!-- Coluna esquerda: dados pessoais -->
+        <div class="col">
+          <div class="col-header"><i class="bi bi-person"></i> Dados pessoais</div>
+
+          <div class="avatar-placeholder">
+            <i class="bi bi-person-circle"></i>
+          </div>
+
+          <div class="field">
+            <label>Nome Completo</label>
+            <input type="text" [(ngModel)]="enrollment.name" name="enroll_name"
+                   placeholder="Digite o seu nome completo">
+          </div>
+          <div class="row-fields">
+            <div class="field">
+              <label>Género</label>
+              <select [(ngModel)]="enrollment.gender" name="enroll_gender">
+                <option value="">Selecionar</option>
+                <option value="M">Masculino</option>
+                <option value="F">Feminino</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Data de nascimento</label>
+              <input type="date" [(ngModel)]="enrollment.birthDate" name="enroll_birth">
+            </div>
+          </div>
+          <div class="field">
+            <label>Bilhete de Identidade</label>
+            <input type="text" [(ngModel)]="enrollment.bi" name="enroll_bi"
+                   placeholder="Número do BI">
+          </div>
+        </div>
+
+        <!-- Coluna direita: dados do curso -->
+        <div class="col">
+          <div class="col-header"><i class="bi bi-book"></i> Dados de Curso</div>
+
+          <div class="field">
+            <label>Nome do Curso</label>
+            <input type="text" [value]="course.name" readonly class="readonly">
+          </div>
+          <div class="row-fields">
+            <div class="field">
+              <label>Duração</label>
+              <input type="text" [value]="course.duration_hours + 'h'" readonly class="readonly">
+            </div>
+            <div class="field">
+              <label>Período</label>
+              <input type="text" value="Manhã" readonly class="readonly">
+            </div>
+          </div>
+          <div class="row-fields">
+            <div class="field">
+              <label>Processo Nº</label>
+              <input type="text" [value]="processNumber" readonly class="readonly">
+            </div>
+            <div class="field">
+              <label>Categoria</label>
+              <input type="text" [value]="course.category || '—'" readonly class="readonly">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="enroll-footer">
+        <button class="btn-submit" (click)="goToPayment()">Continuar</button>
+      </div>
+    </ng-container>
+
+    <!-- ─── PASSO 2: Pagamento ────────────────────────────── -->
+    <ng-container *ngIf="step === 2">
+      <div class="enroll-header">
+        <i class="bi bi-credit-card"></i>
+        <h2>Pagar Matrícula</h2>
+      </div>
+
+      <div class="enroll-body single-col">
+
+        <div class="alert-error" *ngIf="errorMsg">
+          <i class="bi bi-exclamation-circle"></i> {{ errorMsg }}
+        </div>
+
+        <div class="field">
+          <label>Tipo de pagamento</label>
+          <select [(ngModel)]="paymentMethod" name="pay_method">
+            <option value="referencia">Referência Multicaixa</option>
+            <option value="multicaixa_express">Multicaixa Express (GPO)</option>
+          </select>
+        </div>
+
+        <div class="field" *ngIf="paymentMethod === 'multicaixa_express'">
+          <label>Número de telefone</label>
+          <input type="text" [(ngModel)]="phoneNumber" name="pay_phone"
+                 placeholder="Ex: 244900000000">
+        </div>
+
+        <div class="payment-info" *ngIf="paymentResult">
+          <div class="info-row">
+            <span class="info-label">Entidade</span>
+            <span class="info-value">{{ paymentResult?.entity || '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Valor</span>
+            <span class="info-value">{{ course.price }} kz</span>
+          </div>
+          <div class="info-row highlight" *ngIf="paymentResult?.reference">
+            <span class="info-label">Referência</span>
+            <span class="info-value ref">{{ paymentResult?.reference }}</span>
+          </div>
+          <div class="info-row" *ngIf="paymentResult?.status === 'COMPLETED'">
+            <span class="info-label">Estado</span>
+            <span class="info-value success">
+              <i class="bi bi-check-circle-fill"></i> Pago
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="enroll-footer">
+        <button class="btn-outline-red" (click)="step = 1" [disabled]="loading">
+          Voltar
+        </button>
+        <button class="btn-submit" (click)="submitPayment()"
+                [disabled]="loading || paymentResult !== null">
+          <span *ngIf="!loading">Efectuar pagamento</span>
+          <span *ngIf="loading">
+            <i class="bi bi-arrow-repeat spin"></i> A processar...
+          </span>
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- ─── PASSO 3: Sucesso ──────────────────────────────── -->
+    <ng-container *ngIf="step === 3">
+      <div class="success-box">
+        <div class="success-icon">
+          <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <h3>Matrícula feita com sucesso!</h3>
+        <p *ngIf="paymentResult?.reference">
+          Pague a referência <strong>{{ paymentResult?.reference }}</strong>
+          na entidade <strong>{{ paymentResult?.entity }}</strong>
+          para activar a sua inscrição.
+        </p>
+        <p *ngIf="paymentResult?.status === 'COMPLETED'">
+          O seu pagamento foi confirmado. A inscrição está activa!
+        </p>
+        <button class="btn-submit" (click)="close.emit()">OK</button>
+      </div>
+    </ng-container>
+
+  </div>
+</div>

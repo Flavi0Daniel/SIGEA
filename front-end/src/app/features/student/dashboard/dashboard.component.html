@@ -1,0 +1,132 @@
+<!-- src/app/features/student/dashboard/dashboard.component.html -->
+<app-navbar></app-navbar>
+
+<div class="student-page">
+
+  <!-- Boas-vindas -->
+  <div class="welcome-bar" #welcomeBar>
+    <div class="welcome-inner">
+      <div>
+        <h1>Olá, {{ ($any(user?.name) || '').split(' ')[0] }}! 👋</h1>
+        <p>Bem-vindo(a) ao seu portal académico.</p>
+      </div>
+      <button class="btn-primary" routerLink="/student/my-enrollments">
+        <i class="bi bi-plus-circle"></i> Nova Inscrição
+      </button>
+    </div>
+  </div>
+
+  <!-- Cards de resumo -->
+  <div class="stats-grid" #statsGrid>
+    <div class="stat-card" #statCard>
+      <div class="stat-icon red">
+        <i class="bi bi-book-half"></i>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ stats.activeEnrollments }}</span>
+        <span class="stat-label">Inscrições Activas</span>
+      </div>
+    </div>
+
+    <div class="stat-card" #statCard>
+      <div class="stat-icon orange">
+        <i class="bi bi-clock-history"></i>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ stats.pendingPayments }}</span>
+        <span class="stat-label">Pagamentos Pendentes</span>
+      </div>
+    </div>
+
+    <div class="stat-card" #statCard>
+      <div class="stat-icon green">
+        <i class="bi bi-check2-circle"></i>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ stats.completedCourses }}</span>
+        <span class="stat-label">Cursos Concluídos</span>
+      </div>
+    </div>
+
+    <div class="stat-card" #statCard>
+      <div class="stat-icon blue">
+        <i class="bi bi-patch-check"></i>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ stats.certificates }}</span>
+        <span class="stat-label">Certificados</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conteúdo principal -->
+  <div class="main-grid" #mainGrid>
+
+    <!-- Inscrições recentes -->
+    <div class="card">
+      <div class="card-header">
+        <h3><i class="bi bi-list-check"></i> Inscrições Recentes</h3>
+        <a routerLink="/student/my-enrollments" class="link-red">Ver todas</a>
+      </div>
+
+      <div class="empty-state" *ngIf="enrollments.length === 0">
+        <i class="bi bi-inbox"></i>
+        <p>Sem inscrições ainda.<br>
+          <a routerLink="/student/my-enrollments" class="link-red">Inscreva-se num curso</a>
+        </p>
+      </div>
+
+      <table class="data-table" *ngIf="enrollments.length > 0">
+        <thead>
+          <tr>
+            <th>Curso</th>
+            <th>Turma</th>
+            <th>Estado</th>
+            <th>Pagamento</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of enrollments | slice:0:5">
+            <td>{{ e.course_name }}</td>
+            <td>{{ e.class_name }}</td>
+            <td>
+              <span class="badge" [ngClass]="'badge-' + e.status">
+                {{ statusLabel(e.status) }}
+              </span>
+            </td>
+            <td>
+              <span class="badge" [ngClass]="e.payment_status === 'paid' ? 'badge-active' : 'badge-pending'">
+                {{ e.payment_status === 'paid' ? 'Pago' : 'Pendente' }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Atalhos rápidos -->
+    <div class="shortcuts-col">
+      <div class="card shortcut-card" routerLink="/student/profile">
+        <i class="bi bi-person-circle"></i>
+        <span>Meu Perfil</span>
+        <i class="bi bi-chevron-right arrow"></i>
+      </div>
+      <div class="card shortcut-card" routerLink="/student/my-grades">
+        <i class="bi bi-journal-text"></i>
+        <span>Boletim de Notas</span>
+        <i class="bi bi-chevron-right arrow"></i>
+      </div>
+      <div class="card shortcut-card" routerLink="/student/my-payments">
+        <i class="bi bi-credit-card"></i>
+        <span>Pagamentos</span>
+        <i class="bi bi-chevron-right arrow"></i>
+      </div>
+      <div class="card shortcut-card" routerLink="/student/my-certificates">
+        <i class="bi bi-patch-check"></i>
+        <span>Certificados</span>
+        <i class="bi bi-chevron-right arrow"></i>
+      </div>
+    </div>
+  </div>
+
+</div>
